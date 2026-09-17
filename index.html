@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>普列谢茨克公用留声机</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f7f7f7; }
+  h1 { text-align: center; }
+  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .card h3 { margin: 0 0 12px; font-size: 16px; }
+  iframe, video, audio { width: 100%; border: none; border-radius: 8px; }
+  .jump { display: inline-block; padding: 10px 18px; background: #1db954; color: #fff; text-decoration: none; border-radius: 8px; }
+</style>
+</head>
+<body>
+<h1>🎵 阿丽娜的碟片</h1>
+<div id="app">加载中...</div>
+
+<script>
+fetch('list.json')
+  .then(r => r.json())
+  .then(list => {
+    const app = document.getElementById('app');
+    app.innerHTML = '';
+    list.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      let html = `<h3>${item.title}</h3>`;
+
+      if (item.platform === 'bilibili') {
+        html += `<iframe src="//player.bilibili.com/player.html?bvid=${item.id}&autoplay=0" height="400" allowfullscreen></iframe>`;
+      } else if (item.platform === 'youtube') {
+        html += `<iframe src="https://www.youtube.com/embed/${item.id}" height="400" allowfullscreen></iframe>`;
+      } else if (item.platform === 'netease') {
+        html += `<iframe src="//music.163.com/outchain/player?type=2&id=${item.id}&auto=0&height=66" height="86"></iframe>`;
+      } else if (item.platform === 'direct') {
+        if (item.type === 'video') {
+          html += `<video src="${item.id}" controls></video>`;
+        } else {
+          html += `<audio src="${item.id}" controls></audio>`;
+        }
+      } else {
+        html += `<a class="jump" href="${item.id}" target="_blank">点击打开</a>`;
+      }
+      card.innerHTML = html;
+      app.appendChild(card);
+    });
+  })
+  .catch(e => {
+    document.getElementById('app').innerHTML = '<p>读取 list.json 失败，请确认用 Live Server 打开。</p>';
+  });
+</script>
+</body>
+</html>
