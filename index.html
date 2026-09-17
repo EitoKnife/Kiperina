@@ -5,6 +5,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>普列谢茨克公用留声机</title>
 <style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: linear-gradient(160deg, #2b1d17 0%, #4a2f23 50%, #6b4630 100%);
+    min-height: 100vh;
+    color: #f5e6d3;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: #e8c88a;
+    margin-bottom: 44px;
+    font-weight: 500;
+    text-shadow: 0 2px 12px rgba(0,0,0,.6);
+  }
+  .card {
+    background: rgba(60, 40, 28, .55);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(232, 200, 138, .18);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.45);
+    transition: transform .25s, box-shadow .25s, border-color .25s;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(0,0,0,.6);
+    border-color: rgba(232, 200, 138, .4);
+  }
+  .card h3 {
+    margin: 0 0 14px;
+    font-size: 17px;
+    font-weight: 500;
+    color: #e8c88a;
+    letter-spacing: 1px;
+  }
+  iframe, video, audio {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    display: block;
+  }
+  .jump {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #8b5a2b, #c9a15a);
+    color: #2b1d17;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: opacity .2s;
+  }
+  .jump:hover { opacity: .85; }
+</style>
   body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f7f7f7; }
   h1 { text-align: center; }
   .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
