@@ -80,7 +80,9 @@ fetch('list.json')
       const card = document.createElement('div');
       card.className = 'card';
       let html = `<h3>${item.title}</h3>`;
-
+      if (item.lyrics) {
+        html += `<pre style="white-space:pre-wrap;color:#c9a15a;font-size:13px;line-height:1.8;margin:12px 0 0;font-family:inherit;">${item.lyrics}</pre>`;
+      }
       if (item.platform === 'bilibili') {
         html += `<iframe src="//player.bilibili.com/player.html?bvid=${item.id}&autoplay=0" height="400" allowfullscreen></iframe>`;
       } else if (item.platform === 'youtube') {
