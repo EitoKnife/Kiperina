@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>俄罗斯方块</title>
+<style>
+  body {
+    margin: 0; min-height: 100vh;
+    background: linear-gradient(160deg, #2b1d17, #4a2f23);
+    color: #e8c88a;
+    font-family: system-ui, sans-serif;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px; padding: 20px;
+    user-select: none; -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+  h1 { letter-spacing: 4px; font-weight: 500; margin: 0; }
+  canvas { background: rgba(0,0,0,.4); border-radius: 10px; border: 1px solid rgba(232,200,138,.3); }
+  .tip { color: #c9a15a; font-size: 12px; letter-spacing: 1px; margin: 0; }
+  .pad { display: grid; grid-template-columns: repeat(4, 64px); gap: 10px; }
+  .pad button {
+    height: 64px; font-size: 20px;
+    background: rgba(232,200,138,.12);
+    color: #e8c88a;
+    border: 1px solid rgba(232,200,138,.35);
+    border-radius: 12px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .pad button:active { background: rgba(232,200,138,.3); }
+  a { color: #e8c88a; }
+</style>
+</head>
+<body>
+<h1>俄罗斯方块</h1>
+<canvas id="c" width="240" height="480"></canvas>
+<p class="tip">键盘：← → 移动　↑ 旋转　↓ 加速　空格 直落</p>
+<div class="pad">
+  <button id="bL">←</button>
+  <button id="bR">→</button>
+  <button id="bU">↻</button>
+  <button id="bD">↓</button>
+</div>
+<div class="pad">
+  <button id="bDrop" style="grid-column: span 4;">⤓ 直落</button>
+</div>
+<p><a href="index.html">← 回到匣子</a></p>
+
+<script>
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const COLS = 10, ROWS = 20, S = 24;
+const SHAPES = [
+  [[1,1,1,1]],
+  [[1,1],[1,1]],
+  [[0,1,0],[1,1,1]],
+  [[1,0,0],[1,1,1]],
+  [[0,0,1],[1,1,1]],
+  [[0,1,1],[1,1,0]],
+  [[1,1,0],[0,1,1]]
+];
+const COLORS = ['#e8c88a','#c9a15a','#a87b4a','#d4a373','#8b5a2b','#e0b97d','#b98a55'];
+let board, cur, cx, cy, timer, score;
+
+function newBoard(){ return Array.from({length:ROWS},()=>Array(COLS).fill(0)); }
+function newPiece(){
+  const i = Math.floor(Math.random()*SHAPES.length);
+  return { shape: SHAPES[i], color: COLORS[i] };
+}
+function spawn(){
+  cur = newPiece();
+  cx = Math.floor((COLS - cur.shape[0].length)/2);
+  cy = 0;
+  if (collide(cx, cy, cur.shape)) { clearInterval(timer); alert('游戏结束！得分：'+score); reset(); }
+}
+function collide(x, y, shape){
+  for (let r=0; r<shape.length; r++)
+    for (let c=0; c<shape[r].length; c++){
+      if (!shape[r][c]) continue;
+      const nx = x+c, ny = y+r;
+      if (nx<0 || nx>=COLS || ny>=ROWS) return true;
+      if (ny>=0 && board[ny][nx]) return true;
+    }
+  return false;
+}
+function merge(){
+  cur.shape.forEach((row,r)=>row.forEach((v,c)=>{
+    if (v && cy+r>=0) board[cy+r][cx+c] = cur.color;
+  }));
+}
+function clearLines(){
+  let cleared = 0;
+  for (let r=ROWS-1; r>=0; r--){
+    if (board[r].every(v=>v)){
+      board.splice(r,1);
+      board.unshift(Array(COLS).fill(0));
+      cleared++; r++;
+    }
+  }
+  score += cleared * 100;
+}
+function rotate(){
+  const s = cur.shape;
+  const rs = s[0].map((_,i)=>s.map(row=>row[i]).reverse());
+  if (!collide(cx, cy, rs)) cur.shape = rs;
+}
+function drop(){
+  if (!collide(cx, cy+1, cur.shape)) cy++;
+  else { merge(); clearLines(); spawn(); }
+  draw();
+}
+function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++){
+    if (board[r][c]){
+      ctx.fillStyle = board[r][c];
+      ctx.fillRect(c*S, r*S, S-1, S-1);
+    }
+  }
+  if (cur) cur.shape.forEach((row,r)=>row.forEach((v,c)=>{
+    if (v){ ctx.fillStyle = cur.color; ctx.fillRect((cx+c)*S,(cy+r)*S,S-1,S-1); }
+  }));
+  ctx.fillStyle = '#e8c88a';
+  ctx.font = '16px system-ui';
+  ctx.fillText('得分：'+score, 10, 20);
+}
+function reset(){
+  board = newBoard();
+  score = 0;
+  spawn();
+  clearInterval(timer);
+  timer = setInterval(drop, 500);
+  draw();
+}
+
+/* 键盘 */
+document.addEventListener('keydown', e=>{
+  if (e.key==='ArrowLeft' && !collide(cx-1,cy,cur.shape)) cx--;
+  else if (e.key==='ArrowRight' && !collide(cx+1,cy,cur.shape)) cx++;
+  else if (e.key==='ArrowDown') drop();
+  else if (e.key==='ArrowUp') rotate();
+  else if (e.key===' '){ while(!collide(cx,cy+1,cur.shape)) cy++; drop(); }
+  draw();
+});
+
+/* 触屏按钮 */
+function bindBtn(id, fn){
+  const el = document.getElementById(id);
+  el.addEventListener('click', e => { e.preventDefault(); fn(); });
+}
+bindBtn('bL', ()=>{ if (!collide(cx-1,cy,cur.shape)) cx--; draw(); });
+bindBtn('bR', ()=>{ if (!collide(cx+1,cy,cur.shape)) cx++; draw(); });
+bindBtn('bU', ()=>{ rotate(); draw(); });
+bindBtn('bD', ()=>{ drop(); });
+bindBtn('bDrop', ()=>{ while(!collide(cx,cy+1,cur.shape)) cy++; drop(); });
+
+reset();
+</script>
+</body>
+</html>
